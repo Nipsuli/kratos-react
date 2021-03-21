@@ -36,12 +36,12 @@ What works:
 * fetching current user
 * https locally
 * bakend routed via [ory oathkeeper](https://www.ory.sh/oathkeeper/) (in dev also frontend to run with same certs easily)
+* simple api testing auth / token stuff
 
 Todo:
 * recovery flow
 * email verification flow
 * some social login
-* add some api
 
 ## Random notes
 

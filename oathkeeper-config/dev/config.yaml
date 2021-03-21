@@ -6,6 +6,23 @@ serve:
         path: /etc/certs/oathkeeper/*.nipsuli.dev.crt
       key:
         path: /etc/certs/oathkeeper/*.nipsuli.dev.key
+    cors:
+      enabled: true
+      allow_credentials: true
+      allowed_origins:
+        - https://app.nipsuli.dev
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Cookie
+      exposed_headers:
+        - Content-Type
+        - Set-Cookie
   api:
     port: 4456
 
@@ -37,8 +54,12 @@ mutators:
   id_token:
     enabled: true
     config:
-      issuer_url: http://localhost:4455/
+      issuer_url: http://oathkeeper:4455/
       jwks_url: file:///etc/config/oathkeeper/jwks.json
+      claims: |
+        {
+          "session": {{ .Extra | toJson }}
+        }
 
 authorizers:
   allow:
@@ -47,9 +68,18 @@ authorizers:
     enabled: true
 
 authenticators:
-  noop:
-    enabled: true
   anonymous:
     enabled: true
     config:
       subject: guest
+  cookie_session:
+    enabled: true
+    config:
+      check_session_url: http://kratos:4433/sessions/whoami
+      preserve_path: true
+      extra_from: "@this"
+      subject_from: "identity.id"
+      only:
+        - ory_kratos_session
+  noop:
+    enabled: true

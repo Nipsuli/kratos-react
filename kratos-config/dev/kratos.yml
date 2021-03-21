@@ -5,22 +5,6 @@ dsn: memory
 serve:
   public:
     base_url: https://auth.nipsuli.dev/
-    cors:
-      enabled: true
-      allowed_origins:
-        - https://app.nipsuli.dev
-      allowed_methods:
-        - POST
-        - GET
-        - PUT
-        - PATCH
-        - DELETE
-      allowed_headers:
-        - Authorization
-        - Cookie
-      exposed_headers:
-        - Content-Type
-        - Set-Cookie
   admin:
     base_url: http://kratos:4434/
 
@@ -49,7 +33,7 @@ selfservice:
       enabled: true
       ui_url: https://app.nipsuli.dev/verify
       after:
-        default_browser_return_url: https://app.nipsuli.dev/
+        default_browser_return_url: https://app.nipsuli.dev
 
     logout:
       after:
@@ -76,6 +60,10 @@ log:
 secrets:
   cookie:
     - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+
+session:
+  cookie:
+    domain: nipsuli.dev
 
 hashers:
   argon2:

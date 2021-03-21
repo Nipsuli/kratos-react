@@ -41,9 +41,9 @@
       "url": "https://gateway.nipsuli.dev/api1/<.*>",
       "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"]
     },
-    "authenticators": [{ "handler": "noop" }],
+    "authenticators": [{ "handler": "cookie_session" }],
     "authorizer": { "handler": "allow" },
-    "mutators": [{ "handler": "noop" }],
+    "mutators": [{ "handler": "id_token" }],
     "errors": [{ "handler": "json" }]
   }
 ]
