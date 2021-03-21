@@ -1,0 +1,49 @@
+[
+  {
+    "id": "web-app",
+    "upstream": {
+      "url": "http://host.docker.internal:3000",
+      "preserve_host": true
+    },
+    "match": {
+      "url": "https://app.nipsuli.dev/<.*>",
+      "methods": ["GET"]
+    },
+    "authenticators": [{ "handler": "noop" }],
+    "authorizer": { "handler": "allow" },
+    "mutators": [{ "handler": "noop" }],
+    "errors": [{ "handler": "redirect" }]
+
+  },
+  {
+    "id": "auth",
+    "upstream": {
+      "url": "http://kratos:4433",
+      "preserve_host": true
+    },
+    "match": {
+      "url": "https://auth.nipsuli.dev/<.*>",
+      "methods": ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    "authenticators": [{ "handler": "noop" }],
+    "authorizer": { "handler": "allow" },
+    "mutators": [{ "handler": "noop" }],
+    "errors": [{ "handler": "redirect" }]
+  },
+  {
+    "id": "api1",
+    "upstream": {
+      "url": "http://api1:1243",
+      "preserve_host": true,
+      "strip_path": "/api1"
+    },
+    "match": {
+      "url": "https://gateway.nipsuli.dev/api1/<.*>",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    "authenticators": [{ "handler": "noop" }],
+    "authorizer": { "handler": "allow" },
+    "mutators": [{ "handler": "noop" }],
+    "errors": [{ "handler": "json" }]
+  }
+]

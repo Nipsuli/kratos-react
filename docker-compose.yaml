@@ -9,7 +9,7 @@ services:
       - DSN=postgres://kratos:secret@postgresd:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
     volumes:
       - type: bind
-        source: ./kratos-config
+        source: ./kratos-config/dev
         target: /etc/config/kratos
     command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
     restart: on-failure
@@ -19,7 +19,7 @@ services:
       - kratos-migrate
     image: oryd/kratos:v0.5.5-alpha.1
     ports:
-      - '4433:4433' # public
+      #- '4433:4433' # public, exposed via oathkeeper
       - '4434:4434' # admin
     restart: unless-stopped
     environment:
@@ -27,8 +27,24 @@ services:
     command: serve -c /etc/config/kratos/kratos.yml --dev
     volumes:
       - type: bind
-        source: ./kratos-config
+        source: ./kratos-config/dev
         target: /etc/config/kratos
+
+  oathkeeper:
+    image: oryd/oathkeeper:v0.38.9-beta.1
+    ports:
+      - '80:80'
+      - '443:443' # running the proxy in https
+      - '4456:4456' # admin api
+    restart: on-failure
+    command: serve -c /etc/config/oathkeeper/config.yaml
+    volumes:
+      - type: bind
+        source: ./oathkeeper-config/dev
+        target: /etc/config/oathkeeper
+      - type: bind
+        source: ./certs
+        target: /etc/certs/oathkeeper
 
   mailslurper:
     image: oryd/mailslurper:latest-smtps
@@ -44,3 +60,14 @@ services:
       - POSTGRES_USER=kratos
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=kratos
+  
+  api1:
+    depends_on:
+      - oathkeeper
+    build:
+      context: ./api1
+      dockerfile: Dockerfile
+    command: uvicorn app:app --host 0.0.0.0 --port 1243 --loop uvloop --reload
+    volumes:
+      - ./api1/src:/app
+

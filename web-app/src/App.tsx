@@ -7,9 +7,9 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import { useFetch, useAsync } from "react-async";
+import { useFetch, useAsync, PromiseFn } from "react-async";
 // should be from some config object blaa blaa
-const KRATOS_URI = "http://127.0.0.1:4433";
+const KRATOS_URI = "https://auth.nipsuli.dev";
 
 const Header = () => {
   return (
@@ -77,8 +77,28 @@ const App = () => {
   );
 };
 
+const getError: PromiseFn<string> = async ({ errorId }) => {
+  if (!errorId) return null;
+  const res = await fetch(`${KRATOS_URI}/self-service/errors?error=${errorId}`);
+  return res.json()
+};
+
 const Err = () => {
-  return <h2>Error</h2>;
+  const loc = useLocation();
+  const params = new URLSearchParams(loc.search);
+  const errorId = params.get("error");
+  const { data, error, isPending } = useAsync({ promiseFn: getError, errorId });
+  let errorDetails = "";
+  if (isPending) errorDetails = "Loading Error Details";
+  if (error) errorDetails = "Un expected error";
+  // MIGHT NOT BE THE BEST WAY IN PROD TO EXPOSE ERRORS TO USER
+  if (data) errorDetails = JSON.stringify(data, undefined, 2);
+  return (
+    <div>
+      <h2>Error</h2>
+      <pre>{errorDetails}</pre>
+    </div>
+  );
 };
 
 const Logout = () => {
@@ -106,6 +126,7 @@ type FormData = {
   action: string;
   method: string;
   fields: FormField[];
+  messages?: FieldMessage[];
 };
 
 // There got to be some better way to get thsi mapping
@@ -121,7 +142,7 @@ const getFieldName = (key: string): string => {
   return fieldMap[key] || key;
 };
 
-const KratosForm = ({ action, method, fields }: FormData) => {
+const KratosForm = ({ action, method, fields, messages }: FormData) => {
   // "Simple" form generated automatically based on Kratos, endpoint data
   const [valState, setValState] = React.useState(
     Object.fromEntries(
@@ -154,6 +175,7 @@ const KratosForm = ({ action, method, fields }: FormData) => {
             </div>
           );
         })}
+        { !!messages ? messages.map((m, i) => <div key={i}>{m.text}</div>) : null }
         <input type="submit" />
       </form>
     </div>
@@ -191,7 +213,6 @@ const KratosFlowForm = ({
     methods?: { [key: string]: { config: FormData; method: string } };
   };
   const configs = Object.values(d?.methods || {});
-  console.log(configs);
 
   return (
     <div>

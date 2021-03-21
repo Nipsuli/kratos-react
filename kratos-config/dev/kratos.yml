@@ -4,18 +4,30 @@ dsn: memory
 
 serve:
   public:
-    base_url: http://127.0.0.1:4433/
+    base_url: https://auth.nipsuli.dev/
     cors:
       enabled: true
       allowed_origins:
-        - http://127.0.0.1:3000
+        - https://app.nipsuli.dev
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Cookie
+      exposed_headers:
+        - Content-Type
+        - Set-Cookie
   admin:
     base_url: http://kratos:4434/
 
 selfservice:
-  default_browser_return_url: http://127.0.0.1:3000/
+  default_browser_return_url: https://app.nipsuli.dev/
   whitelisted_return_urls:
-    - http://127.0.0.1:3000
+    - https://app.nipsuli.dev
 
   methods:
     password:
@@ -23,33 +35,33 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://127.0.0.1:3000/error
+      ui_url: https://app.nipsuli.dev/error
 
     settings:
-      ui_url: http://127.0.0.1:3000/settings
+      ui_url: https://app.nipsuli.dev/settings
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://127.0.0.1:3000/recovery
+      ui_url: https://app.nipsuli.dev/recovery
 
     verification:
       enabled: true
-      ui_url: http://127.0.0.1:3000/verify
+      ui_url: https://app.nipsuli.dev/verify
       after:
-        default_browser_return_url: http://127.0.0.1:3000/
+        default_browser_return_url: https://app.nipsuli.dev/
 
     logout:
       after:
-        default_browser_return_url: http://127.0.0.1:3000/auth/login
+        default_browser_return_url: https://app.nipsuli.dev/auth/login
 
     login:
-      ui_url: http://127.0.0.1:3000/auth/login
+      ui_url: https://app.nipsuli.dev/auth/login
       lifespan: 10m
 
     registration:
       lifespan: 10m
-      ui_url: http://127.0.0.1:3000/auth/registration
+      ui_url: https://app.nipsuli.dev/auth/registration
       after:
         password:
           hooks:
