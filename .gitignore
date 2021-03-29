@@ -4,3 +4,5 @@ __pycache__/
 # certs
 *.key
 *.crt
+
+*jwks.json

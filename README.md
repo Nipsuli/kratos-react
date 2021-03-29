@@ -2,22 +2,15 @@
 
 Just playing around with [ORY Kratos](https://www.ory.sh/kratos) and react.
 
+Requirements:
+
+* [mkcert](https://github.com/FiloSottile/mkcert) after installation remember to run `mkcert -install`
+* [Docker](https://docs.docker.com/engine/install/)
+* [Node](https://nodejs.org/en/download/)
+
 Setup:
 
-Generate local dev certs generated with [mkcert](https://github.com/FiloSottile/mkcert) like:
-
-```
-host=*.nipsuli.dev
-mkcert -cert-file certs/$host.crt -key-file certs/$host.key $host
-```
-gitignoring these.
-
-Adding stuff to `/etc/hosts` (idempotently)
-```
-grep -qF -- "127.0.0.1 gateway.nipsuli.dev" "/etc/hosts" || echo "127.0.0.1 gateway.nipsuli.dev" | sudo tee -a "/etc/hosts"
-grep -qF -- "127.0.0.1 app.nipsuli.dev" "/etc/hosts" || echo "127.0.0.1 app.nipsuli.dev" | sudo tee -a "/etc/hosts"
-grep -qF -- "127.0.0.1 auth.nipsuli.dev" "/etc/hosts" || echo "127.0.0.1 auth.nipsuli.dev" | sudo tee -a "/etc/hosts"
-```
+`./setup.sh`
 
 How to run:
 
@@ -42,11 +35,4 @@ Todo:
 * recovery flow
 * email verification flow
 * some social login
-
-## Random notes
-
-Genereted JWK with:
-```
-docker-compose run oathkeeper credentials generate --alg RS512 > oathkeeper-config/dev/jwks.json
-```
 
