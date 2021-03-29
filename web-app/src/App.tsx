@@ -1,15 +1,12 @@
 import React from "react";
 import "./App.css";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useLocation,
-} from "react-router-dom";
-import { useFetch, useAsync, PromiseFn } from "react-async";
-// should be from some config object blaa blaa
-const KRATOS_URI = "https://auth.nipsuli.dev";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { useAsync } from "react-async";
+
+import { Loading, ErrorBox } from "./Utils";
+import { AuthError, KratosFlow } from "./Kratos";
+import { getUser } from "./user";
+import { KRATOS_URI } from "./config";
 
 const Header = () => {
   return (
@@ -19,10 +16,16 @@ const Header = () => {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/settings">Settings</Link>
+          <Link to="/settings/settings">Settings</Link>
         </li>
         <li>
           <Link to="/me">Me</Link>
+        </li>
+        <li>
+          <Link to="/auth/recovery">Recovery</Link>
+        </li>
+        <li>
+          <Link to="/auth/verify">Verify</Link>
         </li>
         <li>
           <Link to="/auth/login">Login</Link>
@@ -44,16 +47,16 @@ const App = () => {
       <div>
         <Header />
         <Switch>
-          <Route path="/error">
-            <Err />
+          <Route path="/auth/error">
+            <AuthError />
           </Route>
-          <Route path="/settings">
+          <Route path="/auth/settings">
             <Settings />
           </Route>
-          <Route path="/recovery">
+          <Route path="/auth/recovery">
             <Recovery />
           </Route>
-          <Route path="/verify">
+          <Route path="/auth/verify">
             <Verify />
           </Route>
           <Route path="/auth/login">
@@ -77,165 +80,9 @@ const App = () => {
   );
 };
 
-const getError: PromiseFn<string> = async ({ errorId }) => {
-  if (!errorId) return null;
-  const res = await fetch(`${KRATOS_URI}/self-service/errors?error=${errorId}`);
-  return res.json()
-};
-
-const Err = () => {
-  const loc = useLocation();
-  const params = new URLSearchParams(loc.search);
-  const errorId = params.get("error");
-  const { data, error, isPending } = useAsync({ promiseFn: getError, errorId });
-  let errorDetails = "";
-  if (isPending) errorDetails = "Loading Error Details";
-  if (error) errorDetails = "Un expected error";
-  // MIGHT NOT BE THE BEST WAY IN PROD TO EXPOSE ERRORS TO USER
-  if (data) errorDetails = JSON.stringify(data, undefined, 2);
-  return (
-    <div>
-      <h2>Error</h2>
-      <pre>{errorDetails}</pre>
-    </div>
-  );
-};
-
 const Logout = () => {
   window.location.href = `${KRATOS_URI}/self-service/browser/flows/logout`;
   return <Loading />;
-};
-
-// Kratos form data
-type FieldMessage = {
-  context: { reason: string };
-  id: number;
-  text: string;
-  type: "error"; // check other possibilities
-};
-
-type FormField = {
-  name: string;
-  type: string;
-  required?: boolean;
-  value?: string;
-  messages?: FieldMessage[];
-};
-
-type FormData = {
-  action: string;
-  method: string;
-  fields: FormField[];
-  messages?: FieldMessage[];
-};
-
-// There got to be some better way to get thsi mapping
-const fieldMap: Record<string, string> = {
-  "traits.name.last": "Last name",
-  "traits.name.first": "First name",
-  "traits.email": "Email address",
-  password: "Password",
-  identifier: "Email address",
-};
-
-const getFieldName = (key: string): string => {
-  return fieldMap[key] || key;
-};
-
-const KratosForm = ({ action, method, fields, messages }: FormData) => {
-  // "Simple" form generated automatically based on Kratos, endpoint data
-  const [valState, setValState] = React.useState(
-    Object.fromEntries(
-      fields.filter((f) => !!f.value).map((f) => [f.name, f.value])
-    )
-  );
-  const setFormValue = (k: string, v: string) => {
-    if (k in valState) {
-      setValState({ ...valState, [k]: v });
-    }
-  };
-  return (
-    <div>
-      <form action={action} method={method}>
-        {fields.map((f, i) => {
-          const { name, type, required, messages } = f;
-          return (
-            <div key={i}>
-              {type !== "hidden" ? (
-                <label htmlFor={name}>{getFieldName(name)}:</label>
-              ) : null}
-              <input
-                id={name}
-                {...{ name, type, required, value: valState[name] }}
-                onChange={(e) => setFormValue(name, e.target.value)}
-              />
-              {!!messages
-                ? messages.map((m, i) => <label key={i}>{m.text}</label>)
-                : null}
-            </div>
-          );
-        })}
-        { !!messages ? messages.map((m, i) => <div key={i}>{m.text}</div>) : null }
-        <input type="submit" />
-      </form>
-    </div>
-  );
-};
-
-const useFlowId = () => {
-  const loc = useLocation();
-  const params = new URLSearchParams(loc.search);
-  return params.get("flow");
-};
-
-type KratosFlowType = "registration" | "login" | "settings";
-
-const KratosFlowForm = ({
-  flowId,
-  flowType,
-}: {
-  flowId: string;
-  flowType: KratosFlowType;
-}) => {
-  const headers = { Accept: "application/json" };
-  const { data, error, isPending } = useFetch(
-    `${KRATOS_URI}/self-service/${flowType}/flows?id=${flowId}`,
-    {
-      headers,
-      credentials: "include",
-    }
-  );
-  if (isPending) return <Loading />;
-  if (error) return <ErrorBox />;
-  // check expires_at from the data, after that the flow returbs returns 410 Gone
-  // Should do some real checking on the data
-  const d = data as {
-    methods?: { [key: string]: { config: FormData; method: string } };
-  };
-  const configs = Object.values(d?.methods || {});
-
-  return (
-    <div>
-      {configs.map((c, i) => {
-        return (
-          <div key={i}>
-            <h3>{c.method}</h3>
-            <KratosForm {...c.config} />
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const KratosFlow = ({ flowType }: { flowType: KratosFlowType }) => {
-  const flowId = useFlowId();
-  if (!flowId) {
-    window.location.href = `${KRATOS_URI}/self-service/${flowType}/browser`;
-    return <Loading />;
-  }
-
-  return <KratosFlowForm flowId={flowId} flowType={flowType} />;
 };
 
 const Registration = () => {
@@ -266,47 +113,21 @@ const Settings = () => {
 };
 
 const Recovery = () => {
-  return <h2>Recovery</h2>;
+  return (
+    <div>
+      <h2>Recovery</h2>
+      <KratosFlow flowType="recovery" />
+    </div>
+  );
 };
 
 const Verify = () => {
-  return <h2>Verify</h2>;
-};
-
-const Loading = () => {
-  return <h2>I'm a cool spinner for realz</h2>;
-};
-
-const ErrorBox = () => {
-  return <h2>I'm a sad error</h2>;
-};
-
-// Not full user fields, but typing some of the fields for now
-type UserIdentity = {
-  id: string;
-  traits: {
-    name: {
-      last: string;
-      first: string;
-    };
-    email: string;
-  };
-};
-
-type User = {
-  id: string;
-  identity: UserIdentity;
-};
-
-const getUser = async (): Promise<User | null> => {
-  const headers = { Accept: "application/json" };
-  const res = await fetch(`${KRATOS_URI}/sessions/whoami`, {
-    headers,
-    credentials: "include",
-  });
-  if (res.status === 200) return res.json();
-  if (res.status === 401) return null;
-  throw new Error("Failed to fetch user");
+  return (
+    <div>
+      <h2>Verify</h2>
+      <KratosFlow flowType="verification" />
+    </div>
+  );
 };
 
 const Me = () => {

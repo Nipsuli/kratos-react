@@ -1,4 +1,5 @@
-version: v0.4.6-alpha.1
+# see full reference in https://www.ory.sh/kratos/docs/reference/configuration/
+version: v0.5.5-alpha.1
 
 dsn: memory
 
@@ -10,6 +11,7 @@ serve:
 
 selfservice:
   default_browser_return_url: https://app.nipsuli.dev/
+  # List of URLs that are allowed to be redirected to. A redirection request is made by appending `?return_to=...` to Login, Registration, and other self-service flows.
   whitelisted_return_urls:
     - https://app.nipsuli.dev
 
@@ -19,19 +21,19 @@ selfservice:
 
   flows:
     error:
-      ui_url: https://app.nipsuli.dev/error
+      ui_url: https://app.nipsuli.dev/auth/error
 
     settings:
-      ui_url: https://app.nipsuli.dev/settings
+      ui_url: https://app.nipsuli.dev/auth/settings
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: https://app.nipsuli.dev/recovery
+      ui_url: https://app.nipsuli.dev/auth/recovery
 
     verification:
       enabled: true
-      ui_url: https://app.nipsuli.dev/verify
+      ui_url: https://app.nipsuli.dev/auth/verify
       after:
         default_browser_return_url: https://app.nipsuli.dev
 
@@ -49,19 +51,26 @@ selfservice:
       after:
         password:
           hooks:
-            -
-              hook: session
+            - hook: session
+        oidc:
+          hooks:
+            - hook: session
 
 log:
+  # Don't use these settings in prod 
   level: debug
   format: text
   leak_sensitive_values: true
 
-secrets:
-  cookie:
-    - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+# set in SECRETS_COOKIE and SECRETS_DEFAULT  env variables
+# secrets:
+#   cookie:
+#     - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+#   default:
+#     - ipsumipsumipsumi
 
 session:
+  lifespan: 720h
   cookie:
     domain: nipsuli.dev
 
@@ -79,3 +88,6 @@ identity:
 courier:
   smtp:
     connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true
+    # from_address: foo@bar.io
+  # check how to configure templates
+  # template_override_path: /conf/courier-templates

@@ -6,3 +6,6 @@ __pycache__/
 *.crt
 
 *jwks.json
+
+# env file with secrets
+*.dev.env

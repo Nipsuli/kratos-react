@@ -30,9 +30,9 @@ What works:
 * https locally
 * bakend routed via [ory oathkeeper](https://www.ory.sh/oathkeeper/) (in dev also frontend to run with same certs easily)
 * simple api testing auth / token stuff
-
-Todo:
 * recovery flow
 * email verification flow
+
+Todo:
 * some social login
 

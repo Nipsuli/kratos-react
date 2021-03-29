@@ -29,6 +29,8 @@ services:
       - type: bind
         source: ./kratos-config/dev
         target: /etc/config/kratos
+    env_file:
+      - kratos.dev.env
 
   oathkeeper:
     image: oryd/oathkeeper:v0.38.9-beta.1
