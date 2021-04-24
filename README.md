@@ -32,7 +32,5 @@ What works:
 * simple api testing auth / token stuff
 * recovery flow
 * email verification flow
-
-Todo:
-* some social login
+* google login
 

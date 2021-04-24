@@ -41,7 +41,7 @@ errors:
     redirect:
       enabled: true
       config:
-        to: https://app.nipsuli.dev/error
+        to: https://app.nipsuli.dev/
 
 mutators:
   header:

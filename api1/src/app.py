@@ -1,9 +1,23 @@
 import os
 import json
+import typing
 
 import httpx
 import jwt
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+
+class PrettyJSON(JSONResponse):
+
+    def render(self, content: typing.Any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=4,
+            separators=(", ", ": "),
+        ).encode("utf-8")
 
 
 def get_env_or_raise(key):
@@ -34,10 +48,10 @@ def echo(request: Request):
 @app.get("/echo/token")
 def echo_token(request: Request):
     bearer, token = request.headers['authorization'].split()
-    assert bearer == 'Bearer'
+    assert bearer == 'Bearer', "invalid authorization header"
     kid = jwt.get_unverified_header(token)['kid']
     key = public_keys[kid]
 
-    return {
-        'payload': jwt.decode(token, key=key, algorithms=['RS512'])
-    }
+    return PrettyJSON({
+        'payload': jwt.decode(token, key=key, algorithms=['RS512']),
+    })

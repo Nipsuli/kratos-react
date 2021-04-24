@@ -1,7 +1,7 @@
 # see full reference in https://www.ory.sh/kratos/docs/reference/configuration/
 version: v0.5.5-alpha.1
 
-dsn: memory
+  # dsn: memory
 
 serve:
   public:
@@ -18,6 +18,19 @@ selfservice:
   methods:
     password:
       enabled: true
+    oidc:
+      enabled: true
+      config:
+        providers:
+          - id: google
+            provider: google
+            client_id: INSERT GOOGLE ID HERE
+            client_secret: INSERT GOOGLE SECRET HERE
+            mapper_url: file:///etc/config/kratos/oidc.google.jsonnet
+            scope:
+              - profile
+              - email
+              - openid
 
   flows:
     error:
@@ -30,6 +43,8 @@ selfservice:
     recovery:
       enabled: true
       ui_url: https://app.nipsuli.dev/auth/recovery
+      after:
+        default_browser_return_url: https://app.nipsuli.dev
 
     verification:
       enabled: true
@@ -63,11 +78,11 @@ log:
   leak_sensitive_values: true
 
 # set in SECRETS_COOKIE and SECRETS_DEFAULT  env variables
-# secrets:
-#   cookie:
-#     - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
-#   default:
-#     - ipsumipsumipsumi
+secrets:
+  cookie:
+    - xnYQg/yeTf/qW0AFgUDiQ5ujhdwIzhmlUtH/Itqx37w=
+  default:
+    - z2hNuGKtg2zEcjdE9EWykGUe3KZL6NEyqaOqiee1Xtw=
 
 session:
   lifespan: 720h

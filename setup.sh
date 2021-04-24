@@ -6,7 +6,7 @@ append_to_file() {
 }
 
 add_to_etc_hosts() {
-    local host="$1"
+    local host=${1:?Must provide host as arg}
     append_to_file "/etc/hosts" "127.0.0.1 ${host}"
 }
 
@@ -20,5 +20,9 @@ add_to_etc_hosts app.nipsuli.dev
 add_to_etc_hosts auth.nipsuli.dev
 add_to_etc_hosts gateway.nipsuli.dev
 
-
 docker-compose run oathkeeper credentials generate --alg RS512 > oathkeeper-config/dev/jwks.json
+docker-compsoe run kratos-migrate
+
+cp -n kratos-config/dev/kratos.yml.template kratos-config/dev/kratos.yml
+
+echo "Fill in secrets at kratos-config/dev/kratos.yml"

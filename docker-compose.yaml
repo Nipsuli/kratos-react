@@ -14,9 +14,16 @@ services:
     command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
     restart: on-failure
 
+  kratos-cli:
+    image: oryd/kratos:v0.5.5-alpha.1
+    environment:
+      - KRATOS_ADMIN_URL=http://kratos:4434
+
   kratos:
     depends_on:
-      - kratos-migrate
+      - mailslurper
+      - oathkeeper
+      - postgresd
     image: oryd/kratos:v0.5.5-alpha.1
     ports:
       #- '4433:4433' # public, exposed via oathkeeper
@@ -29,8 +36,6 @@ services:
       - type: bind
         source: ./kratos-config/dev
         target: /etc/config/kratos
-    env_file:
-      - kratos.dev.env
 
   oathkeeper:
     image: oryd/oathkeeper:v0.38.9-beta.1

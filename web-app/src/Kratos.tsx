@@ -142,6 +142,7 @@ const KratosFlowForm = ({
   );
   if (isPending) return <Loading />;
   if (error) return <ErrorBox />;
+  // handle 410 response differently 
   console.log(data);
   // check expires_at from the data, after that the flow returbs returns 410 Gone
   // Should do some real checking on the data

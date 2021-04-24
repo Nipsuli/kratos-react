@@ -16,7 +16,7 @@ const Header = () => {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/settings/settings">Settings</Link>
+          <Link to="/auth/settings">Settings</Link>
         </li>
         <li>
           <Link to="/me">Me</Link>
@@ -149,7 +149,7 @@ const Home = () => {
   return (
     <div>
       <h2>Home</h2>
-      {data ? <p> Hello {data.identity.traits.name.first}!</p> : null}
+      {data ? <p> Hello {data.identity?.traits?.name?.first || "no name"}!</p> : null}
     </div>
   );
 };
