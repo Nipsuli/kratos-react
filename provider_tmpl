@@ -1,9 +1,0 @@
-"id: google
-provider: google
-client_id: 853266275289-fcj28d6pcdgtmv4f05rcmsvhfpii2147.apps.googleusercontent.com
-client_secret: GTES0K337K07Bqv5DBhNfySm
-mapper_url: file:///etc/config/kratos/oidc.google.jsonnet
-scope:
-  - profile
-  - email
-  - openid"
